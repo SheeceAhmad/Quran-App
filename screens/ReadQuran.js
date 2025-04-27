@@ -19,10 +19,10 @@ export default function ReadQuranScreen() {
         if (!response.ok) throw new Error(`Arabic API Failed: ${response.status}`);
         if (!translationResponse.ok) throw new Error(`Translation API Failed: ${translationResponse.status}`);
 
-        const quranData = await response.json();
+        const QuranData = await response.json();
         const translationData = await translationResponse.json();
 
-        setVerses(quranData.data.surahs.flatMap((surah, surahIndex) =>
+        setVerses(QuranData.data.surahs.flatMap((surah, surahIndex) =>
           surah.ayahs.map((ayah, ayahIndex) => ({
             arabic: ayah.text,
             translation: translationData.data.surahs[surahIndex].ayahs[ayahIndex]?.text || "Translation missing",
@@ -112,7 +112,9 @@ export default function ReadQuranScreen() {
           </TouchableOpacity>
         )}
       </View>
+      
         {console.log("re rendering")}
+
       <FlatList
         
         ref={flatListRef}
