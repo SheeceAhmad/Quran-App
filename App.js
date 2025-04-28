@@ -9,6 +9,7 @@ import ReadQuran from "./screens/ReadQuran";
 import Search from "./screens/Search";
 import Bookmark from "./screens/Bookmark";
 import Settings from "./screens/Settings";
+import Surah from "./screens/Surah";
 
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
         <Stack.Screen name="Search" component={Search} />
         <Stack.Screen name="Bookmark" component={Bookmark} />
         <Stack.Screen name="Settings" component={Settings} />
+        <Stack.Screen name="Surah" component={Surah} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -1,38 +1,43 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity } from "react-native";
 
+// import Surah from "./screens/Surah";
+
 export default function Search({ navigation }) {
   const [surahs, setSurahs] = useState([]);
   const [filteredSurah, setFilteredSurah] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 20;
+  const [loadMore, setLoadMore] = useState(false);
 
   useEffect(() => {
     const fetchSurah = async () => {
       try {
         const response = await fetch("https://api.alquran.cloud/v1/quran/quran-uthmani");
-        const translationResponse = await fetch("https://api.alquran.cloud/v1/quran/en.sahih");
+        // const translationResponse = await fetch("https://api.alquran.cloud/v1/quran/en.sahih");
 
-        if (!response.ok || !translationResponse.ok)
+        if (!response.ok )
           throw new Error("API Fetch failed");
 
         const quranData = await response.json();
-        const translationData = await translationResponse.json();
+        // const translationData = await translationResponse.json();
 
-        const surahList = quranData.data.surahs.map((surah, surahIndex) => ({
+        const surahList = quranData.data.surahs.map((surah) => ({
           Name: surah.englishName,
           translation: surah.englishNameTranslation,
           number: surah.number,
-          Text: surah.ayahs.map((ayah, ayahIndex) => ({
-            arabic: ayah.text,
-            translation: translationData.data.surahs[surahIndex].ayahs[ayahIndex]?.text || "Translation missing",
-            number: ayah.numberInSurah,
-            ruku: ayah.ruku,
-            globalIndex: ayah.number,
-          })),
+          // Text: surah.ayahs.map((ayah, ayahIndex) => ({
+          //   arabic: ayah.text,
+          //   translation: translationData.data.surahs[surahIndex].ayahs[ayahIndex]?.text || "Translation missing",
+          //   number: ayah.numberInSurah,
+          //   ruku: ayah.ruku,
+          //   globalIndex: ayah.number,
+          // })),
         }));
 
         setSurahs(surahList);
-        setFilteredSurah(surahList);
+        setFilteredSurah(surahList.slice(0, pageSize));
 
       } catch (err) {
         console.error(err);
@@ -49,16 +54,32 @@ export default function Search({ navigation }) {
     setFilteredSurah(filtered);
   };
 
+  const loadMoreSurah = () =>{
+    if (loadMore) return
+    if (filteredSurah.length >= surahs.length) return
+
+    setLoadMore(true);
+
+    const nextPage = currentPage + 1;
+    const startIndex = (nextPage -1) * 20;
+    const lastIndex = (startIndex + 20);
+
+    const moreSurah = surahs.slice(startIndex, lastIndex);
+
+    setFilteredSurah(prevSurahs => [...prevSurahs, ...moreSurah]);
+    setCurrentPage(nextPage);
+    setLoadMore(false);
+
+  }
+
   const renderList = ({ item }) => {
     return (
       <TouchableOpacity
         style={styles.surahItem}
         onPress={() =>
-          navigation.navigate("SurahDetails", {
-            surahIndex: item.number,
-            surahName: item.Name,
-            surahAyahs: item.Text,
-          })
+          navigation.navigate("Surah",{
+            SurahNumber : item.number,
+          }) 
         }
       >
         <Text style={styles.surahNumber}>{item.number}.</Text>
@@ -83,6 +104,8 @@ export default function Search({ navigation }) {
         data={filteredSurah}
         renderItem={renderList}
         keyExtractor={(item) => item.number.toString()}
+        onEndReached = {loadMoreSurah}
+        onEndReachedThreshold={0.8}
       />
     </View>
   );
